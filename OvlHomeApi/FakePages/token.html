@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Ovl Home</title>
+    <meta name="viewport" content="width=device-width">
+    <script src="https://yastatic.net/s3/passport-sdk/autofill/v1/sdk-suggest-with-polyfills-latest.js"></script>
+</head>
+<body>
+    <h1>Получение токена приложения и связывание аккаунтов</h1>
+    <p id="welcome-text">Воспользуйтесь виджетом мгновенной авторизации Яндекс для продолжения</p>
+    <script>
+        const YANDEX_API_DOMAIN = "https://login.yandex.ru"
+        const SERVICE_API_DOMAIN = "https://iot.bakery.keenetic.name"
+        const CLIENT_ID = "14289bc4533a46a887fd6be2f1c742e4"
+
+        window.onload = function () {
+            if (!localStorage.getItem('Ya.Oauth.Sdk.Token')) {
+                window.YaAuthSuggest.init(
+                    {
+                        client_id: CLIENT_ID,
+                        response_type: "token",
+                        redirect_uri: `${SERVICE_API_DOMAIN}/token-provide.html`
+                    },
+                    SERVICE_API_DOMAIN,
+                    {
+                        view: "default"
+                    }
+                )
+                .then(({ handler }) => handler())
+                .then(data => (console.log('Сообщение с токеном', data), successful_auth()))
+                .catch(error => console.log('Обработка ошибки', error))
+            } else {
+                successful_auth()
+            }
+        };
+
+        function successful_auth() {
+            var user_info = getRequestBody("info");
+            document.getElementById("welcome-text").innerHTML = `Вы успешно авторизовались в Яндекс, ${user_info.login}!`
+            var image = document.createElement("img");
+            image.src = `https://avatars.yandex.net/get-yapic/${user_info.default_avatar_id}/islands-200`;
+            document.body.appendChild(image);
+
+            var token = document.createElement("p");
+            token.innerHTML = `Ваш токен: <b>${localStorage.getItem('Ya.Oauth.Sdk.Token')}</b>`;
+            document.body.appendChild(token);
+        }
+
+        function getRequestBody(method, reqType = "GET", domain = YANDEX_API_DOMAIN) {
+            var req = apiRequest(method, reqType, domain)
+            if (req.status == 200) {
+                return JSON.parse(req.responseText)
+            } else {
+                console.error(`REQUEST ERROR ${req.status}`, req);
+            }
+        }
+
+        function apiRequest(method, reqType = "GET", domain = YANDEX_API_DOMAIN) {
+            var req = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+            req.open(reqType, `${domain}/${method}`, false);
+            req.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('Ya.Oauth.Sdk.Token'));
+            req.send();
+            return req;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Ovl Home OAuth</title>
+    <meta name="viewport" content="width=device-width">
+    <script src="https://yastatic.net/s3/passport-sdk/autofill/v1/sdk-suggest-token-with-polyfills-latest.js"></script>
+</head>
+<body>
+    <h1>Успешная авторизация!</h1>
+    <script>
+            window.onload = function() {
+                window.YaSendSuggestToken("https://iot.bakery.keenetic.name", {
+                    "kek": true
+                });
+            };
+    </script>
+</body>
+</html>
